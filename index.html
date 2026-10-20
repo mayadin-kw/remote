@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no, maximum-scale=1">
+<meta name="theme-color" content="#10151F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ريموت">
+<title>ريموت التلفزيون</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #10151F; --night: #1C2537; --night-hi: #263149; --line: #2B3650;
+    --sand: #EADBC2; --dune: #A89C88; --saffron: #E3A23B; --sadu: #B23A2E;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; height: 100%; overflow: hidden; overscroll-behavior: none; background: var(--ink); color: var(--sand); }
+  body {
+    font-family: "IBM Plex Sans Arabic", system-ui, sans-serif;
+    height: 100dvh; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
+    padding: max(10px, env(safe-area-inset-top)) 16px max(12px, env(safe-area-inset-bottom));
+    display: flex; justify-content: center;
+  }
+  .remote {
+    width: 100%; max-width: 420px; height: 100%;
+    display: grid; gap: clamp(8px, 1.6dvh, 14px);
+    grid-template-rows: auto auto auto minmax(0, 1fr) auto auto;
+  }
+  button { font: inherit; color: inherit; border: 0; cursor: pointer; touch-action: none; }
+
+  /* sadu band: the remote's one ornament, shared with the receiver on the TV */
+  .sadu { height: 6px; border-radius: 3px; background:
+    conic-gradient(from 135deg at 50% 0, var(--saffron) 90deg, transparent 0) 0 0 / 14px 6px,
+    linear-gradient(90deg, var(--sadu) 0 50%, var(--sand) 0) 0 0 / 56px 6px; opacity: .9; }
+
+  header { display: flex; align-items: center; gap: 12px; }
+  .state { flex: 1; display: flex; align-items: center; gap: 10px; font-size: 15px; color: var(--dune); }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--dune); }
+  .dot.on { background: #4FD1A1; animation: pulse 2.4s infinite; }
+  .dot.off { background: var(--sadu); }
+  @keyframes pulse { 0%{box-shadow:0 0 0 0 #4FD1A155} 70%{box-shadow:0 0 0 9px #4FD1A100} 100%{box-shadow:0 0 0 0 #4FD1A100} }
+  .power { width: 54px; height: 54px; border-radius: 50%; background: var(--sadu); color: #fff;
+    display: grid; place-items: center; box-shadow: 0 6px 18px #B23A2E55; }
+  .ghost { height: 44px; padding: 0 14px; border-radius: 14px; background: var(--night); color: var(--sand); font-size: 14px; }
+
+  .apps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .apps button { height: clamp(40px, 6dvh, 50px); border-radius: 14px; background: var(--night); font-weight: 600; font-size: 13px; }
+  .apps .recv { background: var(--saffron); color: var(--ink); }
+
+  .pad-wrap { display: grid; place-items: center; min-height: 0; }
+  .pad { position: relative; height: min(100%, 86vw, 330px); aspect-ratio: 1; border-radius: 50%;
+    background: radial-gradient(circle at 50% 40%, var(--night-hi), var(--night) 70%); border: 1px solid var(--line); }
+  .pad .dir { position: absolute; background: transparent; color: var(--dune); display: grid; place-items: center; border-radius: 50%; }
+  .pad .up    { top: 2%;  left: 32%; width: 36%; height: 30%; }
+  .pad .down  { bottom: 2%; left: 32%; width: 36%; height: 30%; }
+  .pad .left  { left: 2%; top: 32%; width: 30%; height: 36%; }
+  .pad .right { right: 2%; top: 32%; width: 30%; height: 36%; }
+  .pad .dir.pressed { color: var(--saffron); background: #E3A23B1A; }
+  .ok { position: absolute; inset: 30%; border-radius: 50%; background: var(--ink); color: var(--sand);
+    font-weight: 700; font-size: clamp(18px, 3dvh, 24px); display: grid; place-items: center; border: 1px solid var(--line); }
+  .ok svg.ring { position: absolute; inset: -6px; width: calc(100% + 12px); height: calc(100% + 12px); transform: rotate(-90deg); pointer-events: none; }
+  .ok .ring circle { fill: none; stroke: var(--saffron); stroke-width: 4; stroke-linecap: round; stroke-dasharray: 302; stroke-dashoffset: 302; }
+  .ok.holding .ring circle { transition: stroke-dashoffset .6s linear; stroke-dashoffset: 0; }
+  .ok.pressed { background: var(--night-hi); }
+  .ok small { position: absolute; bottom: 17%; font-size: 10px; font-weight: 400; color: var(--dune); }
+  svg.i { width: 26px; height: 26px; stroke: currentColor; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .nav { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .nav button { height: clamp(46px, 7dvh, 58px); border-radius: 18px; background: var(--night); display: grid; place-items: center; }
+  .nav .menu { color: var(--saffron); }
+
+  .bottom { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: stretch; }
+  .rocker { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; background: var(--night); border-radius: 18px; height: clamp(46px, 7dvh, 58px); overflow: hidden; }
+  .rocker button { height: 100%; background: transparent; display: grid; place-items: center; }
+  .rocker span { font-size: 11px; color: var(--dune); }
+  .mid { display: flex; gap: 8px; }
+  .mid button { width: clamp(46px, 7dvh, 58px); border-radius: 18px; background: var(--night); display: grid; place-items: center; font-weight: 700; font-size: 13px; }
+  .pressed:not(.dir):not(.ok) { background: var(--night-hi) !important; transform: scale(.96); }
+
+  /* sheets: numbers and typing slide over the remote, so nothing ever scrolls */
+  .sheet { position: fixed; inset: auto 0 0 0; margin: 0 auto; max-width: 452px; background: var(--night);
+    border-radius: 24px 24px 0 0; padding: 16px 16px max(16px, env(safe-area-inset-bottom));
+    transform: translateY(105%); transition: transform .22s ease; box-shadow: 0 -12px 40px #0008; z-index: 5; }
+  .sheet.open { transform: none; }
+  .sheet .grab { width: 40px; height: 4px; border-radius: 2px; background: var(--line); margin: 0 auto 14px; }
+  .keys { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .keys button { height: 54px; border-radius: 14px; background: var(--night-hi); font-size: 22px; font-weight: 600; }
+  .typing { display: flex; gap: 8px; }
+  .typing input { flex: 1; min-width: 0; font: inherit; font-size: 17px; color: var(--sand); background: var(--ink); border: 1px solid var(--line);
+    border-radius: 14px; padding: 12px 14px; direction: ltr; text-align: left; outline: none; }
+  .typing input:focus { border-color: var(--saffron); }
+  .typing button { padding: 0 18px; border-radius: 14px; background: var(--saffron); color: var(--ink); font-weight: 700; }
+  .note { font-size: 12px; color: var(--dune); margin-top: 8px; }
+  .scrim { position: fixed; inset: 0; background: #0007; opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 4; }
+  .scrim.open { opacity: 1; pointer-events: auto; }
+
+  .toast { position: fixed; top: max(14px, env(safe-area-inset-top)); left: 50%; transform: translate(-50%, -140%);
+    background: var(--night-hi); color: var(--sand); padding: 10px 18px; border-radius: 14px; font-size: 14px;
+    transition: transform .25s ease, opacity .25s; z-index: 9; white-space: nowrap; border: 1px solid var(--line); opacity: 0; }
+  .toast.show { transform: translate(-50%, 0); opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<div class="remote">
+  <div class="sadu" aria-hidden="true"></div>
+
+  <header>
+    <div class="state"><span id="dot" class="dot"></span><span id="stxt">يتصل…</span></div>
+    <button class="ghost" data-key="INPUT">المدخلات</button>
+    <button class="power" data-key="POWER" aria-label="تشغيل أو إطفاء">
+      <svg class="i" viewBox="0 0 24 24"><path d="M12 3v8"/><path d="M6.3 6.8a8 8 0 1 0 11.4 0"/></svg>
+    </button>
+  </header>
+
+  <div class="apps">
+    <button class="recv" data-app="receiver">القنوات</button>
+    <button data-app="youtube">YouTube</button>
+    <button data-app="netflix">Netflix</button>
+    <button data-key="SETTINGS">الإعدادات</button>
+  </div>
+
+  <div class="pad-wrap">
+    <div class="pad">
+      <button class="dir up" data-key="UP" data-repeat aria-label="فوق"><svg class="i" viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></svg></button>
+      <button class="dir right" data-key="RIGHT" data-repeat aria-label="يمين"><svg class="i" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+      <button class="dir left" data-key="LEFT" data-repeat aria-label="يسار"><svg class="i" viewBox="0 0 24 24"><path d="m15 6-6 6 6 6"/></svg></button>
+      <button class="dir down" data-key="DOWN" data-repeat aria-label="تحت"><svg class="i" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
+      <button class="ok" id="ok" aria-label="موافق، اضغط مطوّلاً للمفضلة">OK<small>مطوّل للمفضلة</small>
+        <svg class="ring" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="nav">
+    <button data-key="BACK" aria-label="رجوع"><svg class="i" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
+    <button data-key="HOME" aria-label="الرئيسية"><svg class="i" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg></button>
+    <button class="menu" data-key="MENU" aria-label="القائمة"><svg class="i" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </div>
+
+  <div class="bottom">
+    <div class="rocker">
+      <button data-key="VOL_DOWN" data-repeat aria-label="خفض الصوت"><svg class="i" viewBox="0 0 24 24"><path d="M5 12h14"/></svg></button>
+      <span>الصوت</span>
+      <button data-key="VOL_UP" data-repeat aria-label="رفع الصوت"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></button>
+    </div>
+    <div class="mid">
+      <button data-key="MUTE" aria-label="كتم"><svg class="i" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4z"/><path d="m22 9-6 6M16 9l6 6"/></svg></button>
+      <button id="numBtn" aria-label="الأرقام والكتابة">123</button>
+    </div>
+    <div class="rocker">
+      <button data-key="CH_DOWN" data-repeat aria-label="القناة السابقة"><svg class="i" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></button>
+      <span>القناة</span>
+      <button data-key="CH_UP" data-repeat aria-label="القناة التالية"><svg class="i" viewBox="0 0 24 24"><path d="m6 15 6-6 6 6"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet">
+  <div class="grab"></div>
+  <div class="keys">
+    <button data-key="1">1</button><button data-key="2">2</button><button data-key="3">3</button>
+    <button data-key="4">4</button><button data-key="5">5</button><button data-key="6">6</button>
+    <button data-key="7">7</button><button data-key="8">8</button><button data-key="9">9</button>
+    <button data-key="DEL" aria-label="مسح">⌫</button><button data-key="0">0</button><button data-key="BACK" aria-label="رجوع">↩</button>
+  </div>
+  <div class="typing" style="margin-top:12px">
+    <input id="txt" placeholder="اكتب بحثاً بالإنجليزي" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="send">
+    <button id="sendTxt">إرسال</button>
+  </div>
+  <div class="note">الكتابة تروح للخانة المفتوحة على التلفزيون.</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const SERVER = 'https://tv.162-35-27-249.sslip.io';
+const $ = id => document.getElementById(id);
+const dot = $('dot'), stxt = $('stxt');
+
+function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 1800); }
+function buzz(ms = 10) { if (navigator.vibrate) navigator.vibrate(ms); }
+
+async function api(cmd, arg) {
+  try {
+    const r = await fetch(SERVER + '/api/cmd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cmd, arg }) });
+    const j = await r.json().catch(() => ({}));
+    if (j.waking) { toast('يشغّل التلفزيون…'); return; }
+    if (!j.ok) toast(j.error === 'tv offline' ? 'التلفزيون غير متصل' : 'ما تنفّذ الأمر');
+  } catch { toast('ما قدرت أوصل للسيرفر'); }
+}
+
+async function status() {
+  try {
+    const j = await (await fetch(SERVER + '/api/status')).json();
+    dot.className = 'dot ' + (j.tv ? 'on' : 'off');
+    stxt.textContent = j.tv ? 'متصل بالتلفزيون' : 'التلفزيون غير متصل';
+  } catch { dot.className = 'dot off'; stxt.textContent = 'السيرفر غير متاح'; }
+}
+
+// Buttons: tap sends once; arrows, volume and channel repeat while held.
+document.querySelectorAll('[data-key],[data-app]').forEach(b => {
+  let timer = null, rep = null;
+  const fire = () => { buzz(); b.dataset.app ? api('app', b.dataset.app) : api('key', b.dataset.key); };
+  const stop = () => { clearTimeout(timer); clearInterval(rep); timer = rep = null; b.classList.remove('pressed'); };
+  b.addEventListener('pointerdown', e => {
+    e.preventDefault(); b.setPointerCapture?.(e.pointerId); b.classList.add('pressed'); fire();
+    if (b.hasAttribute('data-repeat')) timer = setTimeout(() => { rep = setInterval(fire, 150); }, 420);
+  });
+  ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(ev => b.addEventListener(ev, stop));
+  b.addEventListener('contextmenu', e => e.preventDefault());
+});
+
+// OK: tap selects; holding fills the ring and sends a long press (favourite on the receiver).
+(() => {
+  const ok = $('ok'); let t = null, long = false;
+  ok.addEventListener('pointerdown', e => {
+    e.preventDefault(); ok.setPointerCapture?.(e.pointerId); long = false;
+    ok.classList.add('pressed', 'holding'); buzz(8);
+    t = setTimeout(() => { long = true; buzz([20, 40, 20]); api('longkey', 'OK'); toast('ضغطة مطوّلة'); ok.classList.remove('holding'); }, 600);
+  });
+  const end = fire => { clearTimeout(t); ok.classList.remove('pressed', 'holding'); if (fire && !long) api('key', 'OK'); long = false; };
+  ok.addEventListener('pointerup', () => end(true));
+  ok.addEventListener('pointercancel', () => end(false));
+  ok.addEventListener('contextmenu', e => e.preventDefault());
+})();
+
+const sheet = $('sheet'), scrim = $('scrim');
+const openSheet = v => { sheet.classList.toggle('open', v); scrim.classList.toggle('open', v); if (!v) $('txt').blur(); };
+$('numBtn').addEventListener('click', () => openSheet(!sheet.classList.contains('open')));
+scrim.addEventListener('click', () => openSheet(false));
+$('sendTxt').addEventListener('click', () => {
+  const v = $('txt').value.trim();
+  if (!v) return;
+  if (!/^[A-Za-z0-9 .,_@:/?=&+\-]+$/.test(v)) { toast('حروف إنجليزية وأرقام بس'); return; }
+  api('text', v); $('txt').value = ''; toast('انكتب على التلفزيون');
+});
+$('txt').addEventListener('keydown', e => { if (e.key === 'Enter') $('sendTxt').click(); });
+document.addEventListener('touchmove', e => { if (!e.target.closest('input')) e.preventDefault(); }, { passive: false });
+
+status(); setInterval(status, 5000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) status(); });
+</script>
+</body>
+</html>
