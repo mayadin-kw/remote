@@ -49,6 +49,33 @@
   .apps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
   .apps button { height: clamp(40px, 6dvh, 50px); border-radius: 14px; background: var(--night); font-weight: 600; font-size: 13px; }
   .apps .recv { background: var(--saffron); color: var(--ink); }
+  .apps .browse { background: #263149; color: var(--sand); }
+  .browser { position:fixed; inset:0; z-index:50; display:none; flex-direction:column; gap:10px; padding:max(10px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom)); background:var(--ink); }
+  .browser.open { display:flex; }
+  .bhead { display:flex; align-items:center; gap:8px; } .bhead h2 { flex:1; margin:0; font-size:19px; }
+  .bhead button,.btools button { height:42px; min-width:44px; padding:0 12px; border-radius:13px; background:var(--night); }
+  .bhead .add { background:var(--saffron); color:var(--ink); font-size:24px; font-weight:700; }
+  .bhead .settings.on { color:var(--saffron); }
+  .sites { display:flex; flex:1; flex-direction:column; align-items:center; gap:14px; overflow:auto; min-height:0; padding:12px 0; }
+  .site { position:relative; flex:none; width:min(100%,520px); min-height:86px; padding:14px 52px 14px 16px; border-radius:20px; background:var(--saffron); color:var(--ink); font-size:22px; font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:normal; box-shadow:0 8px 18px #E3A23B33; }
+  .site.selected { box-shadow:inset 0 0 0 2px var(--sand),0 8px 18px #E3A23B33; }
+  .site .manage { position:absolute; inset-inline-end:8px; top:7px; display:grid; gap:4px; }
+  .site .manage span { display:grid; place-items:center; width:25px; height:25px; border-radius:9px; background:#10151F22; color:var(--ink); font-size:15px; }
+  .btools { display:flex; gap:8px; } .btools input { flex:1; min-width:0; direction:ltr; color:var(--sand); background:var(--night); border:1px solid var(--line); border-radius:13px; padding:0 12px; font:inherit; }
+  .framewrap { flex:1; min-height:0; background:#fff; border-radius:16px; overflow:hidden; } .framewrap iframe { width:100%;height:100%;border:0;background:white; }
+  .cast { height:54px; flex:none; border-radius:17px; background:var(--saffron); color:var(--ink); font-size:17px; font-weight:700; }
+  .success-modal { position:fixed; inset:0; z-index:70; display:none; align-items:center; justify-content:center; padding:22px; background:#0009; }
+  .success-modal.open { display:flex; }
+  .success-card { width:min(100%,340px); padding:24px 20px 16px; border:1px solid #344054; border-radius:22px; background:#182131; text-align:center; box-shadow:0 20px 70px #0009; animation:successIn .18s ease-out; }
+  .success-check { display:grid; place-items:center; width:48px; height:48px; margin:0 auto 12px; border-radius:50%; background:#16B88522; color:#16B885; font-size:27px; }
+  .success-card p { margin:0 0 18px; color:#F4F4F5; font-size:17px; font-weight:700; line-height:1.6; }
+  .success-card button { width:100%; height:44px; border-radius:12px; background:var(--saffron); color:var(--ink); font-weight:700; }
+  @keyframes successIn { from { opacity:0; transform:translateY(8px) scale(.98); } }
+  .browser:not(.site-open) .btools,.browser:not(.site-open) .framewrap,.browser:not(.site-open) .cast,.browser:not(.site-open) .bnote { display:none !important; }
+  .browser.site-open .sites { display:none; }
+  .bnote { margin:0; color:var(--dune); font-size:12px; text-align:center; }
+  .modal { position:fixed; inset:0; z-index:60; display:none; align-items:center; justify-content:center; padding:20px; background:#000a; } .modal.open { display:flex; }
+  .mbox { width:min(100%,400px); background:var(--night); border:1px solid var(--line); border-radius:22px; padding:18px; } .mbox h3 { margin:0 0 14px; } .mbox input { width:100%; height:48px; margin:5px 0; padding:0 12px; border:1px solid var(--line); border-radius:12px; background:var(--ink); color:var(--sand); font:inherit; } .mactions { display:flex; gap:8px; margin-top:12px; } .mactions button { flex:1; height:46px; border-radius:13px; background:var(--night-hi); } .mactions .save { background:var(--saffron); color:var(--ink); font-weight:700; }
 
   .pad-wrap { display: grid; place-items: center; min-height: 0; }
   .pad { position: relative; height: min(100%, 86vw, 330px); aspect-ratio: 1; border-radius: 50%;
@@ -130,17 +157,36 @@
   .send-draw { flex: none; height: 52px; border-radius: 18px; background: var(--saffron); color: var(--ink); font-weight: 700; font-size: 17px; }
   .send-draw:disabled { opacity: .4; }
   .mine { height: 52px; padding: 0 14px; border-radius: 18px; background: var(--night); color: var(--sand); font-weight: 600; font-size: 14px; }
-  .gallery { position: fixed; inset: auto 0 0 0; z-index: 30; max-width: 452px; margin: 0 auto; background: var(--night);
-    border-radius: 24px 24px 0 0; padding: 14px 16px max(16px, env(safe-area-inset-bottom)); transform: translateY(105%);
-    transition: transform .22s ease; box-shadow: 0 -12px 40px #000a; }
-  .gallery.open { transform: none; }
-  .ghead { display: flex; align-items: center; margin-bottom: 12px; }
-  .ghead b { flex: 1; font-size: 17px; }
+  .gallery { position: fixed; inset: 0; z-index: 30; background: #06080D; display: none; flex-direction: column; gap: 12px;
+    padding: max(10px, env(safe-area-inset-top)) 14px max(12px, env(safe-area-inset-bottom)); }
+  .gallery.open { display: flex; animation: rise .22s ease; }
+  .ghead { display: flex; align-items: center; gap: 10px; }
+  .ghead b { flex: 1; font-size: 20px; }
+  .gsub { color: var(--dune); font-size: 13px; margin-top: -4px; }
   .clear-all { height: 36px; padding: 0 12px; border-radius: 12px; background: #B23A2E33; color: #FF8A80; font-size: 13px; }
-  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-height: 46dvh; overflow: auto; }
-  .tile { position: relative; aspect-ratio: 1; border-radius: 16px; background: #05070B; border: 1px solid var(--line); display: grid; place-items: center; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; flex: 1; min-height: 0; overflow: auto; align-content: start; }
+  .tile { cursor: pointer; transition: transform .15s; position: relative; aspect-ratio: 1; border-radius: 16px; background: #05070B; border: 1px solid var(--line); display: grid; place-items: center; }
   .tile img { max-width: 82%; max-height: 82%; }
   .tile button { position: absolute; top: 6px; left: 6px; width: 28px; height: 28px; border-radius: 50%; background: #000a; color: #fff; font-size: 15px; }
+  .tile.drop { animation: drop .5s ease; }
+  @keyframes drop { 30% { transform: translateY(-10px) scale(1.05); box-shadow: 0 0 22px #FF2BD688; } }
+  .size { position: fixed; inset: 0; z-index: 35; background: #06080DF2; display: none; flex-direction: column; justify-content: center; gap: 18px;
+    padding: max(10px, env(safe-area-inset-top)) 18px max(16px, env(safe-area-inset-bottom)); }
+  .size.open { display: flex; animation: rise .2s ease; }
+  .size h3 { margin: 0; font-size: 20px; text-align: center; }
+  .size p { margin: -10px 0 0; text-align: center; color: var(--dune); font-size: 13px; }
+  .tv { position: relative; width: 100%; aspect-ratio: 16 / 9; border-radius: 10px; border: 6px solid #1B1F28;
+    background: radial-gradient(circle at 40% 35%, #1a2233, #07090E 70%); box-shadow: 0 10px 30px #000a; overflow: hidden; }
+  .tv::after { content: ""; position: absolute; left: 50%; bottom: -30px; width: 30%; height: 24px; transform: translateX(-50%); }
+  .stand { width: 26%; height: 8px; margin: -12px auto 0; border-radius: 0 0 8px 8px; background: #1B1F28; }
+  .tv img { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); filter: drop-shadow(0 0 6px #ffffff22); }
+  .slider { display: flex; align-items: center; gap: 12px; }
+  .slider span { font-size: 13px; color: var(--dune); width: 44px; text-align: center; }
+  .slider input { flex: 1; accent-color: var(--saffron); height: 30px; }
+  .sbtns { display: grid; grid-template-columns: 1fr 2fr; gap: 10px; }
+  .sbtns button { height: 52px; border-radius: 18px; font-weight: 700; font-size: 16px; }
+  .sbtns .cancel { background: var(--night); color: var(--sand); }
+  .sbtns .go { background: var(--saffron); color: var(--ink); }
   .empty { color: var(--dune); font-size: 14px; padding: 14px 0 6px; text-align: center; }
   .fly { position: fixed; z-index: 40; pointer-events: none; transition: transform .7s cubic-bezier(.5,-0.3,.7,0), opacity .7s; }
 </style>
@@ -165,6 +211,7 @@
     <button data-app="youtube">YouTube</button>
     <button data-app="netflix">Netflix</button>
     <button data-key="SETTINGS">الإعدادات</button>
+    <button class="browse" id="browseBtn">التصفح</button>
   </div>
 
   <div class="pad-wrap">
@@ -203,6 +250,15 @@
   </div>
 </div>
 
+<section class="browser" id="browser" aria-label="التصفح">
+  <div class="bhead"><button id="browseBack" aria-label="رجوع">‹</button><h2>التصفح</h2><button class="settings" id="siteManage">إعدادات</button><button class="add" id="siteAdd" aria-label="إضافة موقع">＋</button></div>
+  <div class="sites" id="sites"></div>
+  <div class="btools"><button id="webBack" aria-label="السابق">‹</button><button id="webReload" aria-label="تحديث">↻</button><input id="webUrl" inputmode="url" placeholder="https://example.com"><button id="webGo">اذهب</button></div>
+  <div class="framewrap"><iframe id="webFrame" title="صفحة الموقع" referrerpolicy="no-referrer" sandbox="allow-scripts allow-same-origin allow-forms allow-presentation"></iframe></div>
+  <button class="cast" id="castVideo">عرض</button>
+  <p class="bnote" id="browserNote">افتح صفحة فيديو ثم اضغط «عرض» لإرساله إلى التلفزيون.</p>
+</section>
+<div class="modal" id="siteModal"><div class="mbox"><h3 id="siteModalTitle">إضافة موقع</h3><input id="siteName" placeholder="اسم الزر"><input id="siteAddress" placeholder="https://example.com" inputmode="url"><div class="mactions"><button id="siteCancel">إلغاء</button><button class="save" id="siteSave">حفظ</button></div></div></div>
 <div class="scrim" id="scrim"></div>
 <div class="sheet" id="sheet">
   <div class="grab"></div>
@@ -238,12 +294,24 @@
   </div>
   <button class="send-draw" id="sendDraw" disabled>أضفها للتلفزيون</button>
 </div>
-<div class="scrim" id="gscrim" style="z-index:25"></div>
 <div class="gallery" id="gallery">
-  <div class="ghead"><b>الرسمات على التلفزيون</b><button class="clear-all" id="clearAll">احذف الكل</button></div>
+  <div class="ghead">
+    <button class="icon" id="galBack" aria-label="رجوع"><svg class="i" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></button>
+    <b>رسماتي</b>
+    <button class="clear-all" id="clearAll">احذف الكل</button>
+  </div>
+  <div class="gsub">اضغط على أي رسمة عشان تنزل مرة ثانية على التلفزيون، و✕ عشان تحذفها.</div>
   <div class="grid" id="ggrid"></div>
 </div>
+<div class="size" id="sizeBox">
+  <h3>حجمها على التلفزيون</h3>
+  <p>هذا شكل شاشتك، والرسمة بالحجم اللي بتطلع فيه</p>
+  <div><div class="tv" id="tvBox"><img id="tvImg" alt=""></div><div class="stand"></div></div>
+  <div class="slider"><span>أصغر</span><input type="range" id="sizeRange" min="4" max="60" value="14"><span>أكبر</span></div>
+  <div class="sbtns"><button class="cancel" id="sizeCancel">رجوع</button><button class="go" id="sizeGo">أرسلها للتلفزيون</button></div>
+</div>
 <div class="toast" id="toast"></div>
+<div class="success-modal" id="castSuccess" role="dialog" aria-modal="true" aria-labelledby="castSuccessText"><div class="success-card"><div class="success-check">✓</div><p id="castSuccessText">تم بدء العرض على التلفزيون حالياً</p><button id="castSuccessClose">إغلاق</button></div></div>
 
 <script>
 const SERVER = 'https://tv.162-35-27-249.sslip.io';
@@ -251,15 +319,19 @@ const $ = id => document.getElementById(id);
 const dot = $('dot'), stxt = $('stxt');
 
 function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), 1800); }
+function showCastSuccess() { $('castSuccess').classList.add('open'); }
+$('castSuccessClose').onclick = () => $('castSuccess').classList.remove('open');
+$('castSuccess').addEventListener('click', e => { if (e.target === $('castSuccess')) $('castSuccess').classList.remove('open'); });
 function buzz(ms = 10) { if (navigator.vibrate) navigator.vibrate(ms); }
 
 async function api(cmd, arg) {
   try {
     const r = await fetch(SERVER + '/api/cmd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cmd, arg }) });
     const j = await r.json().catch(() => ({}));
-    if (j.waking) { toast('يشغّل التلفزيون…'); return; }
+    if (j.waking) { toast('يشغّل التلفزيون…'); return false; }
     if (!j.ok) toast(j.error === 'tv offline' ? 'التلفزيون غير متصل' : 'ما تنفّذ الأمر');
-  } catch { toast('ما قدرت أوصل للسيرفر'); }
+    return !!j.ok;
+  } catch { toast('ما قدرت أوصل للسيرفر'); return false; }
 }
 
 async function status() {
@@ -386,9 +458,28 @@ document.addEventListener('touchmove', e => { if (!e.target.closest('input, .gri
     return c.toDataURL('image/png');
   }
 
-  $('sendDraw').onclick = async () => {
+  let pendingPng = null, pendingRatio = 1;
+  const sizeBox = $('sizeBox'), tvImg = $('tvImg'), range = $('sizeRange');
+  function placePreview() {
+    const tvW = $('tvBox').clientWidth, frac = range.value / 100, side = tvW * frac;
+    if (pendingRatio >= 1) { tvImg.style.width = side + 'px'; tvImg.style.height = 'auto'; }
+    else { tvImg.style.height = side + 'px'; tvImg.style.width = 'auto'; }
+  }
+  range.addEventListener('input', () => { placePreview(); buzz(3); });
+  $('sendDraw').onclick = () => {
     if (!strokes.length) return;
-    const png = exportPng(), btn = $('sendDraw');
+    pendingPng = exportPng();
+    const probe = new Image();
+    probe.onload = () => { pendingRatio = probe.width / probe.height; placePreview(); };
+    probe.src = pendingPng; tvImg.src = pendingPng;
+    try { range.value = localStorage.getItem('drawSize') || 14; } catch {}
+    sizeBox.classList.add('open'); requestAnimationFrame(placePreview); buzz(8);
+  };
+  $('sizeCancel').onclick = () => sizeBox.classList.remove('open');
+  $('sizeGo').onclick = async () => {
+    const png = pendingPng, size = range.value / 100, btn = $('sizeGo');
+    try { localStorage.setItem('drawSize', range.value); } catch {}
+    sizeBox.classList.remove('open');
     btn.disabled = true;
     // The drawing flies up and away, the way it will drop in on the TV.
     const r = board.getBoundingClientRect(), img = new Image(); img.src = png; img.className = 'fly';
@@ -397,18 +488,19 @@ document.addEventListener('touchmove', e => { if (!e.target.closest('input, .gri
     setTimeout(() => img.remove(), 800);
     buzz([10, 30, 10]);
     try {
-      const res = await fetch(SERVER + '/api/drawings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ png }) });
+      const res = await fetch(SERVER + '/api/drawings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ png, size }) });
       const j = await res.json();
       if (!j.ok) throw 0;
       toast(j.tv ? 'نزلت الرسمة على التلفزيون ✨' : 'انحفظت، وبتنزل أول ما يتصل التلفزيون');
       strokes = []; render();
-    } catch { toast('ما قدرت أرسل الرسمة'); btn.disabled = false; }
+    } catch { toast('ما قدرت أرسل الرسمة'); }
+    btn.disabled = false;
   };
 
-  const gal = $('gallery'), gscrim = $('gscrim');
+  const gal = $('gallery');
   async function openGallery() {
-    gal.classList.add('open'); gscrim.classList.add('open');
-    const grid = $('ggrid'); grid.innerHTML = '<div class="empty">يحمّل…</div>';
+    gal.classList.add('open');
+    const grid = $('ggrid'); grid.innerHTML = '<div class="empty" style="grid-column:1/-1">يحمّل…</div>';
     try {
       const j = await (await fetch(SERVER + '/api/drawings')).json();
       grid.innerHTML = '';
@@ -416,26 +508,70 @@ document.addEventListener('touchmove', e => { if (!e.target.closest('input, .gri
       j.drawings.slice().reverse().forEach(d => {
         const t = document.createElement('div'); t.className = 'tile';
         t.innerHTML = `<img alt="" src="data:image/png;base64,${d.png}"><button aria-label="حذف">✕</button>`;
-        t.querySelector('button').onclick = async () => {
+        let busy = false;
+        t.onclick = async () => {
+          if (busy) return; busy = true; setTimeout(() => busy = false, 700);
+          t.classList.remove('drop'); void t.offsetWidth; t.classList.add('drop'); buzz([8, 20, 8]);
+          try {
+            const j2 = await (await fetch(SERVER + '/api/drawings', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ png: 'data:image/png;base64,' + d.png, size: d.size || 0.14 }) })).json();
+            toast(j2.ok ? 'نزلت مرة ثانية ✨' : 'ما نزلت');
+          } catch { toast('ما قدرت أوصل للسيرفر'); }
+        };
+        t.querySelector('button').onclick = async ev => {
+          ev.stopPropagation();
           t.style.opacity = '.3'; buzz(10);
           await fetch(SERVER + '/api/drawings/' + d.id, { method: 'DELETE' }).catch(() => {});
           t.remove(); if (!grid.children.length) grid.innerHTML = '<div class="empty" style="grid-column:1/-1">ما فيه رسمات على التلفزيون</div>';
         };
         grid.appendChild(t);
       });
-    } catch { grid.innerHTML = '<div class="empty">ما قدرت أوصل للسيرفر</div>'; }
+    } catch { grid.innerHTML = '<div class="empty" style="grid-column:1/-1">ما قدرت أوصل للسيرفر</div>'; }
   }
-  const closeGallery = () => { gal.classList.remove('open'); gscrim.classList.remove('open'); };
-  $('mineBtn').onclick = openGallery; gscrim.onclick = closeGallery;
+  const closeGallery = () => gal.classList.remove('open');
+  $('mineBtn').onclick = openGallery; $('galBack').onclick = closeGallery;
   $('clearAll').onclick = async () => {
     if (!confirm('تحذف كل الرسمات من التلفزيون؟')) return;
     await fetch(SERVER + '/api/drawings/all', { method: 'DELETE' }).catch(() => {});
-    toast('انحذفت كل الرسمات'); closeGallery();
+    toast('انحذفت كل الرسمات'); openGallery();
   };
   $('penBtn').onclick = () => { draw.classList.add('open'); requestAnimationFrame(fit); buzz(8); };
   $('drawClose').onclick = () => { draw.classList.remove('open'); closeGallery(); };
   window.addEventListener('resize', () => { if (draw.classList.contains('open')) fit(); });
 })();
+
+
+// ---------- saved sites and in-app browser ----------
+(() => {
+  const browser=$('browser'), frame=$('webFrame'), input=$('webUrl'), sitesBox=$('sites');
+  let sites=[], editing=null, manage=false, current='';
+  try { sites=JSON.parse(localStorage.getItem('remoteSites')||'[]'); if(!Array.isArray(sites)) sites=[]; } catch {}
+  const safeUrl=value=>{ let u; try { u=new URL(value.includes('://')?value:'https://'+value); } catch { return null; } return ['http:','https:'].includes(u.protocol)?u.href:null; };
+  function save(){ try {localStorage.setItem('remoteSites',JSON.stringify(sites));} catch {} render(); }
+  function render(){ sitesBox.replaceChildren();
+    sites.forEach((site,i)=>{const b=document.createElement('button');b.className='site'+(site.url===current?' selected':'');b.textContent=site.name;b.onclick=()=>open(site.url);if(manage){const actions=document.createElement('span');actions.className='manage';const edit=document.createElement('span');edit.textContent='✎';edit.setAttribute('role','button');edit.onclick=e=>{e.stopPropagation();showModal(i);};const del=document.createElement('span');del.textContent='×';del.setAttribute('role','button');del.onclick=e=>{e.stopPropagation();sites.splice(i,1);save();};actions.append(edit,del);b.append(actions);}sitesBox.append(b);}); }
+  function open(url){const u=safeUrl(url);if(!u){toast('الرابط غير صالح');return;}current=u;input.value=u;render();if(/Android/i.test(navigator.userAgent)){location.href='tvremote://browser?url='+encodeURIComponent(u);}else{browser.classList.add('site-open');frame.src=u;}}
+  $('browseBtn').onclick=()=>{browser.classList.add('open');browser.classList.remove('site-open');current='';input.value='';frame.src='about:blank';render();};
+  $('browseBack').onclick=()=>{if(browser.classList.contains('site-open')){browser.classList.remove('site-open');current='';input.value='';frame.src='about:blank';render();}else browser.classList.remove('open');};
+  $('webGo').onclick=()=>open(input.value); input.addEventListener('keydown',e=>{if(e.key==='Enter')open(input.value);}); $('webReload').onclick=()=>{try{frame.contentWindow.location.reload();}catch{frame.src=current;}};
+  $('webBack').onclick=()=>{try{frame.contentWindow.history.back();}catch{toast('استخدم زر الرجوع داخل الموقع');}};
+  $('siteManage').onclick=e=>{manage=!manage;e.currentTarget.classList.toggle('on',manage);render();};
+  const modal=$('siteModal'); function showModal(i=null){editing=i; $('siteModalTitle').textContent=i===null?'إضافة موقع':'تعديل الموقع';$('siteName').value=i===null?'':sites[i].name;$('siteAddress').value=i===null?'':sites[i].url;modal.classList.add('open');}
+  $('siteAdd').onclick=()=>showModal(); $('siteCancel').onclick=()=>modal.classList.remove('open');
+  $('siteSave').onclick=()=>{const name=$('siteName').value.trim(),url=safeUrl($('siteAddress').value.trim());if(!name||!url){toast('اكتب الاسم ورابطاً صحيحاً');return;}const item={name,url};if(editing===null)sites.push(item);else sites[editing]=item;save();modal.classList.remove('open');};
+  // Read media URLs only when same-origin access is allowed; cross-origin sites may block frame inspection.
+  function findVideo(){try{const d=frame.contentDocument;if(!d)return null;const v=d.querySelector('video');if(v){const src=v.currentSrc||v.src||v.querySelector('source')?.src;if(src)return src;}const m=d.querySelector('meta[property="og:video"],meta[name="twitter:player:stream"]');if(m?.content)return new URL(m.content,current).href;return null;}catch{return null;}}
+  function closeBrowserAfterCast(){browser.classList.remove('open','site-open');current='';input.value='';frame.src='about:blank';render();}
+  async function castMedia(src,title,page,referrer=''){
+    const u=safeUrl(src);if(!u){toast('مصدر الفيديو غير صالح أو غير قابل للبث');return false;}
+    try{const r=await fetch(SERVER+'/api/play',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:u,title,page,referrer})});const j=await r.json().catch(()=>({}));if(!r.ok||!j.ok)throw Error(j.error||'');closeBrowserAfterCast();showCastSuccess();return true;}
+    catch{toast('تعذر تشغيل الفيديو. تحقق من اتصال التلفزيون ومصدر الفيديو.');return false;}
+  }
+  window.castMediaFromNative=(src,title,page,referrer='')=>castMedia(src,title,page,referrer);
+  $('castVideo').onclick=async()=>{const src=findVideo();if(!src){toast('تعذر قراءة مصدر الفيديو من هذه الصفحة. جرّب زر عرض في المتصفح أو موقعاً مباشراً.');return;}await castMedia(src,document.title||new URL(current).hostname,current);};
+  render();
+})();
+
 
 status(); setInterval(status, 5000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) status(); });
